@@ -1,0 +1,27 @@
+.arrow-up {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+
+  border-bottom: 6px solid black;
+  transform: translate(10%, 50%);
+}
+.arrow-down {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+
+  border-top: 6px solid black;
+  transform: translate(10%, -50%);
+}
+
+.arrow-up-active {
+  border-bottom: 6px solid rgb(231, 8, 8);
+}
+.arrow-down-active {
+  border-top: 6px solid rgb(231, 8, 8);
+}

@@ -1,0 +1,16 @@
+.App {
+  font-family: sans-serif;
+  /* text-align: center; */
+}
+
+body {
+  background: lightgoldenrodyellow;
+  margin: 5px;
+}
+
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  background-color: rgb(229, 240, 227);
+}
