@@ -11,23 +11,13 @@ const captitionStyle = css`
   font-size: 0.9em;
   color: hsl(237, 80%, 46%);
   width: auto;
-  /* border-top: 1px solid black;
-  border-left: 1px solid black;
-  border-right: 1px solid black; */
 `;
-
-// const containerStyle = css`
-//   border: 1px solid black;
-//   margin-top: 10px;
-//   width: 100%;
-// `;
 
 const tableCSS = css`
   width: 100%;
-  /* border: 1px solid black; */
   box-sizing: border-box;
-  /* margin: 5px; */
 `;
+
 const rowCSS = css`
   &:nth-of-type(even) {
     background-color: #d6eeee;
@@ -64,14 +54,21 @@ const headerCSS = css`
   }
 `;
 
+const checkboxHeaderCSS = css`
+  text-align: left;
+  white-space: nowrap;
+  width: 10px;
+`;
+
 function Listing({ items, name }) {
   const [content, setContent] = useState(items);
   const [currentCol, setCurrentCol] = useState(-1);
   const [direction, setDirection] = useState(false);
   const [filter, setFilter] = useState("");
   const [filteredColumn, setFilteredColumn] = useState(false);
+  const [checked, setChecked] = useState(false);
 
-  const clearSelection = () => {
+  const clearSorting = () => {
     const allHeaders = document.getElementsByClassName("sortable");
     Array.prototype.forEach.call(allHeaders, (element) => {
       const toRemove = ["arrow-up-active", "arrow-down-active"];
@@ -83,7 +80,7 @@ function Listing({ items, name }) {
     if (content.length <= 1) return;
     const header = e.target;
     const arrowIcon = header.nextSibling;
-    clearSelection();
+    clearSorting();
     const selectedColumn = parseInt(header.getAttribute("index"), 10);
     const key = Object.keys(content[0])[selectedColumn];
     const res = [...content].sort((a, b) => {
@@ -119,7 +116,7 @@ function Listing({ items, name }) {
   });
 
   useEffect(() => {
-    clearSelection();
+    clearSorting();
     setContent(items);
     if (items.length === 0) {
       setFilteredColumn(null);
@@ -165,9 +162,17 @@ function Listing({ items, name }) {
         <tbody>
           <tr key="0">
             {content[0] && (
-              <th style={{ textAlign: "left" }}>
-                <label>
-                  <input type="checkbox"></input>
+              <th css={checkboxHeaderCSS}>
+                <label style={{}}>
+                  <input
+                    type="checkbox"
+                    onClick={(e) => {
+                      setChecked(e.target.checked);
+                    }}
+                  ></input>
+                  <button style={checked ? {} : { display: "none" }}>
+                    Remove
+                  </button>
                 </label>
               </th>
             )}
@@ -186,7 +191,6 @@ function Listing({ items, name }) {
                         onClick={(e) => {
                           setFilteredColumn(key);
                         }}
-                        // style={{ marginLeft: "15px" }}
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 24 24"
                         width="14"
@@ -212,9 +216,14 @@ function Listing({ items, name }) {
           {content.map((item, index) => {
             return (
               <tr key={index} css={rowCSS}>
-                <td>
+                <td style={{}}>
                   <label>
-                    <input type="checkbox"></input>
+                    <input
+                      type="checkbox"
+                      onClick={(e) => {
+                        setChecked(e.target.checked);
+                      }}
+                    ></input>
                   </label>
                 </td>
                 {Object.values(item).map((v, i) => {

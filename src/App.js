@@ -7,7 +7,7 @@ import ActionButton from "./components/button/Simple";
 import axios from "axios";
 import "./styles.css";
 
-// override default styling of used componentents
+// override default styling of used components
 const reloadButtonCSS = css`
   color: blue;
   background-color: rgb(242, 245, 66);
@@ -16,7 +16,7 @@ const moreButtonCSS = css`
   color: blue;
   background-color: hsl(321, 71%, 83%);
 `;
-const deleteButtonCSS = css`
+const lessButtonCSS = css`
   color: blue;
   background-color: #b5f1f2;
 `;
@@ -78,8 +78,11 @@ export default function App() {
     setLimit(0);
   };
 
-  const deleteSelected = () => {
-    console.error("not implemented");
+  const less = () => {
+    const step = 3;
+    const copy = [...items];
+    copy.splice(copy.length - step);
+    setItems(copy);
   };
 
   const more = async () => {
@@ -159,11 +162,7 @@ export default function App() {
           }}
           content="more"
         />
-        <ActionButton
-          css={deleteButtonCSS}
-          action={deleteSelected}
-          content="delete"
-        />
+        <ActionButton css={lessButtonCSS} action={less} content="less" />
         <ActionButton css={clearButtonCSS} action={clear} content="clear" />
       </div>
       <div>
