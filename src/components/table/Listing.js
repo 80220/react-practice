@@ -164,6 +164,13 @@ function Listing({ items, name }) {
         <caption css={captitionStyle}>{name}</caption>
         <tbody>
           <tr key="0">
+            {content[0] && (
+              <th style={{ textAlign: "left" }}>
+                <label>
+                  <input type="checkbox"></input>
+                </label>
+              </th>
+            )}
             {content[0] ? (
               Object.keys(content[0]).map((key, index) => {
                 return (
@@ -201,9 +208,15 @@ function Listing({ items, name }) {
               <th>[empty]</th>
             )}
           </tr>
+
           {content.map((item, index) => {
             return (
               <tr key={index} css={rowCSS}>
+                <td>
+                  <label>
+                    <input type="checkbox"></input>
+                  </label>
+                </td>
                 {Object.values(item).map((v, i) => {
                   return <td key={i}>{v}</td>;
                 })}
