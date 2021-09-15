@@ -1,10 +1,9 @@
 /** @jsxImportSource @emotion/react */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { css } from "@emotion/react";
 
-// default style, can be customized via @classes prop
-const style = css`
-  color: red;
+const base = css`
+  color: black;
   font-weight: bold;
   background-color: lightgreen;
   border: 1px;
@@ -14,17 +13,26 @@ const style = css`
   height: 30px;
   width: 80px;
   &:disabled {
+    box-shadow: none;
     background-color: lightgray;
-    &:before {
-      color: black;
-      content: "loading";
-    }
   }
 `;
 
-function SimpleButton(props) {
+function LoadingButton(props) {
   const { action, content, className } = props;
   const [disabled, setDisabled] = useState(false);
+
+  // default style, can be customized via @classes prop
+  const style = css`
+    ${base}
+    &:disabled {
+      &:before {
+        color: black;
+        content: "loading";
+      }
+    }
+  `;
+
   return (
     <button
       css={style}
@@ -36,9 +44,35 @@ function SimpleButton(props) {
       disabled={disabled}
       className={className} // allow style overriding
     >
-      {disabled ? "" : content}
+      {disabled ? false : content}
     </button>
   );
 }
 
-export default SimpleButton;
+function SimpleButton(props) {
+  const { action, content, className, disabled } = props;
+  const [isDisabled, setIsDisabled] = useState(disabled);
+  const style = css`
+    ${base}
+    &:disabled {
+      color: black;
+    }
+  `;
+
+  useEffect(() => {
+    setIsDisabled(disabled);
+  }, [disabled]);
+
+  return (
+    <button
+      css={style}
+      onClick={action}
+      className={className} // allow style overriding
+      disabled={isDisabled}
+    >
+      {content}
+    </button>
+  );
+}
+
+export { SimpleButton as default, LoadingButton };

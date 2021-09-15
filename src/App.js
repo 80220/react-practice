@@ -2,36 +2,42 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { css } from "@emotion/react";
 import Listing from "./components/table/Listing";
-import ActionButton from "./components/button/Simple";
+import { LoadingButton } from "./components/button/Simple";
+import SimpleButton from "./components/button/Simple";
 
 import axios from "axios";
 import "./styles.css";
 
 // override default styling of used components
-const reloadButtonCSS = css`
+const baseColorButtonCSS = css`
   color: blue;
+`;
+const loadButtonCSS = css`
+  ${baseColorButtonCSS}
+  background-color: rgb(160, 189, 168);
+`;
+const reloadButtonCSS = css`
+  ${baseColorButtonCSS}
   background-color: rgb(242, 245, 66);
 `;
 const moreButtonCSS = css`
-  color: blue;
+  ${baseColorButtonCSS}
   background-color: hsl(321, 71%, 83%);
 `;
 const lessButtonCSS = css`
-  color: blue;
+  ${baseColorButtonCSS}
   background-color: #b5f1f2;
 `;
 const clearButtonCSS = css`
-  color: blue;
+  ${baseColorButtonCSS}
   background-color: lightcoral;
 `;
 
 export default function App() {
   const [items, setItems] = useState([]);
   const [limit, setLimit] = useState(0);
-
+  const [loadButtonDisabled, setLoadButtonDisabled] = useState(false);
   const inputLimit = useRef(null);
-  const loadButton = useRef({ disabled: true });
-  loadButton.current.disabled = true;
 
   const fetch = useCallback(async (quantity) => {
     console.log("......Fetching.......", quantity, "spy(ies)");
@@ -114,9 +120,9 @@ export default function App() {
   const limitChanged = (e) => {
     console.log("limitChanged");
     if (e.target.value !== items.length.toString()) {
-      loadButton.current.disabled = false;
+      setLoadButtonDisabled(false);
     } else {
-      loadButton.current.disabled = true;
+      setLoadButtonDisabled(true);
     }
   };
 
@@ -125,9 +131,11 @@ export default function App() {
       <div className="container">
         <label
           style={{
-            marginRight: "5px",
+            // marginRight: "5px",
             fontFamily: "Tahoma",
-            fontSize: "0.9em"
+            fontSize: "0.8em",
+            fontWeight: "600",
+            color: "rgb(39, 79, 50)"
           }}
         >
           Limit:{" "}
@@ -143,27 +151,26 @@ export default function App() {
               inputLimit.current.focus();
             }}
           ></input>
-          <button
-            ref={loadButton}
-            onClick={() => {
+          <SimpleButton
+            css={loadButtonCSS}
+            action={() => {
               setLimit(parseInt(inputLimit.current.value, 10));
-              loadButton.current.disabled = true;
+              setLoadButtonDisabled(true);
             }}
-          >
-            {" "}
-            Load{" "}
-          </button>
+            content="load"
+            disabled={loadButtonDisabled}
+          />
         </label>
-        <ActionButton css={reloadButtonCSS} action={reload} content="reload" />
-        <ActionButton
+        <LoadingButton css={reloadButtonCSS} action={reload} content="reload" />
+        <LoadingButton
           css={moreButtonCSS}
           action={async () => {
             await more();
           }}
           content="more"
         />
-        <ActionButton css={lessButtonCSS} action={less} content="less" />
-        <ActionButton css={clearButtonCSS} action={clear} content="clear" />
+        <LoadingButton css={lessButtonCSS} action={less} content="less" />
+        <LoadingButton css={clearButtonCSS} action={clear} content="clear" />
       </div>
       <div>
         <Listing items={items} name="List of citizens" />

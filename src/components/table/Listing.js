@@ -60,7 +60,7 @@ const checkboxHeaderCSS = css`
   width: 10px;
 `;
 
-function Listing({ items, name }) {
+function Listing({ items, name, sort }) {
   const [content, setContent] = useState(items);
   const [currentCol, setCurrentCol] = useState(-1);
   const [direction, setDirection] = useState(false);
@@ -120,6 +120,7 @@ function Listing({ items, name }) {
     setContent(items);
     if (items.length === 0) {
       setFilteredColumn(null);
+      setChecked(false);
     }
   }, [items]);
 
