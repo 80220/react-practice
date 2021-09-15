@@ -14,7 +14,7 @@ const reloadButtonCSS = css`
 `;
 const moreButtonCSS = css`
   color: blue;
-  background-color: hsl(322, 71%, 83%);
+  background-color: hsl(321, 71%, 83%);
 `;
 const deleteButtonCSS = css`
   color: blue;
