@@ -2,8 +2,8 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { css } from "@emotion/react";
 import Listing from "./components/table/Listing";
-import { LoadingButton } from "./components/button/Simple";
-import SimpleButton from "./components/button/Simple";
+import SimpleButton, { LoadingButton } from "./components/button/Button";
+import NumericInput from "./components/form/numericField";
 
 import axios from "axios";
 import "./styles.css";
@@ -37,7 +37,7 @@ export default function App() {
   const [items, setItems] = useState([]);
   const [limit, setLimit] = useState(0);
   const [loadButtonDisabled, setLoadButtonDisabled] = useState(false);
-  const inputLimit = useRef(null);
+  const inputLimit = useRef({ current: { value: 0 } });
 
   const fetch = useCallback(async (quantity) => {
     console.log("......Fetching.......", quantity, "spy(ies)");
@@ -114,6 +114,7 @@ export default function App() {
   const readLimit = (e) => {
     if (e.code === "Enter") {
       setLimit(e.target.value);
+      setLoadButtonDisabled(true);
     }
   };
 
@@ -129,48 +130,33 @@ export default function App() {
   return (
     <div style={{}} className="App">
       <div className="container">
-        <label
-          style={{
-            // marginRight: "5px",
-            fontFamily: "Tahoma",
-            fontSize: "0.8em",
-            fontWeight: "600",
-            color: "rgb(39, 79, 50)"
+        <NumericInput
+          value={inputLimit}
+          label="Limit"
+          limits={{ min: 0, max: 10 }}
+          onKeyDown={readLimit}
+          onChange={limitChanged}
+        />
+        <SimpleButton
+          css={loadButtonCSS}
+          action={() => {
+            console.log("inputLimit.current.value", inputLimit.current.value);
+            setLimit(parseInt(inputLimit.current.value, 10));
+            setLoadButtonDisabled(true);
           }}
-        >
-          Limit:{" "}
-          <input
-            style={{}}
-            ref={inputLimit}
-            type="number"
-            min={0}
-            max={20}
-            onKeyDown={readLimit}
-            onChange={limitChanged}
-            onMouseEnter={(e) => {
-              inputLimit.current.focus();
-            }}
-          ></input>
-          <SimpleButton
-            css={loadButtonCSS}
-            action={() => {
-              setLimit(parseInt(inputLimit.current.value, 10));
-              setLoadButtonDisabled(true);
-            }}
-            content="load"
-            disabled={loadButtonDisabled}
-          />
-        </label>
-        <LoadingButton css={reloadButtonCSS} action={reload} content="reload" />
+          label="load"
+          disabled={loadButtonDisabled}
+        />
+        <LoadingButton css={reloadButtonCSS} action={reload} label="reload" />
         <LoadingButton
           css={moreButtonCSS}
           action={async () => {
             await more();
           }}
-          content="more"
+          label="more"
         />
-        <LoadingButton css={lessButtonCSS} action={less} content="less" />
-        <LoadingButton css={clearButtonCSS} action={clear} content="clear" />
+        <LoadingButton css={lessButtonCSS} action={less} label="less" />
+        <LoadingButton css={clearButtonCSS} action={clear} label="clear" />
       </div>
       <div>
         <Listing items={items} name="List of citizens" />

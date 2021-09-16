@@ -19,7 +19,7 @@ const base = css`
 `;
 
 function LoadingButton(props) {
-  const { action, content, className } = props;
+  const { action, label, className } = props;
   const [disabled, setDisabled] = useState(false);
 
   // default style, can be customized via @classes prop
@@ -44,13 +44,13 @@ function LoadingButton(props) {
       disabled={disabled}
       className={className} // allow style overriding
     >
-      {disabled ? false : content}
+      {disabled ? false : label}
     </button>
   );
 }
 
 function SimpleButton(props) {
-  const { action, content, className, disabled } = props;
+  const { action, label, className, disabled } = props;
   const [isDisabled, setIsDisabled] = useState(disabled);
   const style = css`
     ${base}
@@ -70,7 +70,7 @@ function SimpleButton(props) {
       className={className} // allow style overriding
       disabled={isDisabled}
     >
-      {content}
+      {label}
     </button>
   );
 }
