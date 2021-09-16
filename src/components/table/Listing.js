@@ -29,7 +29,6 @@ const rowCSS = css`
 
 const headerCSS = css`
   font-family: "Tahoma";
-  /* font-weight: 500; */
   font-size: 0.8em;
   white-space: nowrap;
   > div:first-of-type {
@@ -83,14 +82,7 @@ function Listing({ items, name, sort }) {
     clearSorting();
     const selectedColumn = parseInt(header.getAttribute("index"), 10);
     const key = Object.keys(content[0])[selectedColumn];
-    const res = [...content].sort((a, b) => {
-      if (direction) {
-        return a[key] < b[key] ? 1 : -1;
-      } else {
-        return a[key] > b[key] ? 1 : -1;
-      }
-    });
-    setContent(res);
+    setContent(sort(content, direction, key));
 
     if (currentCol === -1) {
       arrowIcon.classList.add("arrow-down-active");

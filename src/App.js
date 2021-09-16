@@ -127,6 +127,16 @@ export default function App() {
     }
   };
 
+  const sortItemsDefault = (content, direction, key) => {
+    return [...content].sort((a, b) => {
+      if (direction) {
+        return a[key] < b[key] ? 1 : -1;
+      } else {
+        return a[key] > b[key] ? 1 : -1;
+      }
+    });
+  };
+
   return (
     <div style={{}} className="App">
       <div className="container">
@@ -159,7 +169,11 @@ export default function App() {
         <LoadingButton css={clearButtonCSS} action={clear} label="clear" />
       </div>
       <div>
-        <Listing items={items} name="List of citizens" />
+        <Listing
+          items={items}
+          sort={sortItemsDefault}
+          name="List of citizens"
+        />
       </div>
     </div>
   );
