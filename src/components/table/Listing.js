@@ -60,7 +60,7 @@ const checkboxHeaderCSS = css`
 `;
 
 function Listing({ items, name, sort }) {
-  const [content, setContent] = useState(items);
+  const [content, setContent] = useState([]);
   const [currentCol, setCurrentCol] = useState(-1);
   const [direction, setDirection] = useState(false);
   const [filter, setFilter] = useState("");
@@ -109,7 +109,11 @@ function Listing({ items, name, sort }) {
 
   useEffect(() => {
     clearSorting();
-    setContent(items);
+    setContent(
+      items.map((item) => {
+        return { __meta__: { visible: true }, ...item };
+      })
+    );
     if (items.length === 0) {
       setFilteredColumn(null);
       setChecked(false);
@@ -134,14 +138,36 @@ function Listing({ items, name, sort }) {
             style={{ width: "300px", height: "20px" }}
             value={filter}
             onChange={(e) => {
-              setFilter(e.target.value);
+              const newFilter = e.target.value;
+              setFilter(newFilter);
+              setContent(
+                [...content].map((c) => {
+                  if (c[filteredColumn].startsWith(newFilter)) {
+                    c.__meta__.visible = true;
+                  } else {
+                    c.__meta__.visible = false;
+                  }
+                  return c;
+                })
+              );
             }}
+            autoFocus
           ></input>
           <button
             onClick={() => {
               setFilter("");
+              setContent(
+                [...content].map((c) => {
+                  c.__meta__.visible = true;
+                  return c;
+                })
+              );
             }}
-            style={{ height: "26px" }}
+            style={{
+              height: "15px",
+              width: "10px",
+              boxSizing: "content-box"
+            }}
           >
             x
           </button>
@@ -154,7 +180,7 @@ function Listing({ items, name, sort }) {
         <caption css={captitionStyle}>{name}</caption>
         <tbody>
           <tr key="0">
-            {content[0] && (
+            {content && content[0] && (
               <th css={checkboxHeaderCSS}>
                 <label style={{}}>
                   <input
@@ -169,8 +195,11 @@ function Listing({ items, name, sort }) {
                 </label>
               </th>
             )}
-            {content[0] ? (
+            {content && content[0] ? (
               Object.keys(content[0]).map((key, index) => {
+                if (key === "__meta__") {
+                  return false;
+                }
                 return (
                   <th key={key} css={headerCSS}>
                     <div>
@@ -208,7 +237,11 @@ function Listing({ items, name, sort }) {
 
           {content.map((item, index) => {
             return (
-              <tr key={index} css={rowCSS}>
+              <tr
+                key={index}
+                css={rowCSS}
+                style={item.__meta__.visible ? {} : { display: "none" }}
+              >
                 <td style={{}}>
                   <label>
                     <input
@@ -220,6 +253,9 @@ function Listing({ items, name, sort }) {
                   </label>
                 </td>
                 {Object.values(item).map((v, i) => {
+                  if (Object.keys(item)[i] === "__meta__") {
+                    return false;
+                  }
                   return <td key={i}>{v}</td>;
                 })}
               </tr>
