@@ -65,7 +65,7 @@ function Listing({ items, name, sort }) {
   const [direction, setDirection] = useState(false);
   const [filter, setFilter] = useState("");
   const [filteredColumn, setFilteredColumn] = useState(false);
-  const [checked, setChecked] = useState(false);
+  const [checked, setChecked] = useState(0);
 
   const clearSorting = () => {
     const allHeaders = document.getElementsByClassName("sortable");
@@ -111,17 +111,18 @@ function Listing({ items, name, sort }) {
     clearSorting();
     setContent(
       items.map((item) => {
-        return { __meta__: { visible: true }, ...item };
+        return { __meta__: { visible: true, checked: false }, ...item };
       })
     );
     if (items.length === 0) {
       setFilteredColumn(null);
-      setChecked(false);
+      setChecked(0);
     }
   }, [items]);
 
   return (
     <>
+      {/*** filtering ***/}
       {filteredColumn ? (
         <label
           style={{
@@ -179,6 +180,7 @@ function Listing({ items, name, sort }) {
       <table css={tableCSS}>
         <caption css={captitionStyle}>{name}</caption>
         <tbody>
+          {/*** columns ***/}
           <tr key="0">
             {content && content[0] && (
               <th css={checkboxHeaderCSS}>
@@ -186,10 +188,17 @@ function Listing({ items, name, sort }) {
                   <input
                     type="checkbox"
                     onClick={(e) => {
-                      setChecked(e.target.checked);
+                      if (e.target.checked) setChecked(content.length);
+                      else setChecked(0);
+                      setContent(
+                        [...content].map((c) => {
+                          c.__meta__.checked = e.target.checked;
+                          return c;
+                        })
+                      );
                     }}
                   ></input>
-                  <button style={checked ? {} : { display: "none" }}>
+                  <button style={checked > 0 ? {} : { display: "none" }}>
                     Remove
                   </button>
                 </label>
@@ -234,7 +243,7 @@ function Listing({ items, name, sort }) {
               <th>[empty]</th>
             )}
           </tr>
-
+          {/*** rows ***/}
           {content.map((item, index) => {
             return (
               <tr
@@ -247,8 +256,11 @@ function Listing({ items, name, sort }) {
                     <input
                       type="checkbox"
                       onClick={(e) => {
-                        setChecked(e.target.checked);
+                        if (e.target.checked) setChecked(checked + 1);
+                        else setChecked(checked - 1);
+                        item.__meta__.checked = e.target.checked;
                       }}
+                      checked={item.__meta__.checked}
                     ></input>
                   </label>
                 </td>
