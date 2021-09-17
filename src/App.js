@@ -3,14 +3,14 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { css } from "@emotion/react";
 import Listing from "./components/table/Listing";
 import SimpleButton, { LoadingButton } from "./components/button/Button";
-import NumericInput from "./components/form/numericField";
+import NumericInput from "./components/form/numericInput";
 
 import axios from "axios";
 import "./styles.css";
 
 // override default styling of used components
 const baseColorButtonCSS = css`
-  color: blue;
+  color: rgb(48, 58, 194);
 `;
 const loadButtonCSS = css`
   ${baseColorButtonCSS}

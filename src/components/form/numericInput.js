@@ -2,11 +2,15 @@
 import { useEffect } from "react";
 import { css } from "@emotion/react";
 
-const style = css`
+const labelCSS = css`
   font-family: Tahoma;
   font-size: 0.8em;
   font-weight: 600;
   color: rgb(39, 79, 50);
+`;
+const inputCSS = css`
+  border: 2px solid black;
+  border-radius: 5px;
 `;
 
 function NumericInput(props) {
@@ -18,9 +22,10 @@ function NumericInput(props) {
   });
 
   return (
-    <label css={style}>
+    <label css={labelCSS}>
       {label}:{" "}
       <input
+        css={inputCSS}
         ref={value}
         type="number"
         min={limits.min}
