@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { css } from "@emotion/react";
 
 const labelCSS = css`
+  white-space: nowrap;
   font-family: Tahoma;
   font-size: 0.8em;
   font-weight: 600;
