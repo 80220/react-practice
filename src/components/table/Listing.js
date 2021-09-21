@@ -36,7 +36,7 @@ const headerCSS = css`
     > div {
       width: 90%;
     }
-    > div:nth-child(2) {
+    > div:nth-of-type(2) {
       display: inline-block;
       width: 22px;
       height: 20px;
@@ -57,6 +57,9 @@ const headerCSS = css`
   > div > div > svg {
     padding: 0px 3px 0px 3px;
     margin-left: auto;
+    :hover {
+      cursor: pointer;
+    }
   }
 `;
 
@@ -121,10 +124,10 @@ function Icons() {
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="feather feather-filter"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          // class="feather feather-filter"
         >
           <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
         </symbol>
@@ -134,10 +137,10 @@ function Icons() {
           viewBox="0 0 24 24"
           fill="red"
           stroke="red"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="feather feather-filter"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          // class="feather feather-filter"
         >
           <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
         </symbol>
@@ -362,23 +365,19 @@ function Listing({ items, name, sort }) {
                       className="row-input"
                       type="checkbox"
                       onClick={(e) => {
-                        // console.log("e", e);
                         if (e.target.checked) setChecked(checked + 1);
                         else setChecked(checked - 1);
                         item.__meta__.checked = e.target.checked;
-                      }}
-                      onChange={(e) => {
-                        // console.log(e);
                       }}
                       checked={item.__meta__.checked}
                     ></input>
                   </label>
                 </td>
                 {Object.values(item).map((v, i) => {
-                  if (Object.keys(item)[i] === "__meta__") {
-                    return false;
+                  if (Object.keys(item)[i] !== "__meta__") {
+                    return <td key={i}>{v}</td>;
                   }
-                  return <td key={i}>{v}</td>;
+                  return false;
                 })}
               </tr>
             );
