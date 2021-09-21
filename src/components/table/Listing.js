@@ -36,6 +36,13 @@ const headerCSS = css`
     > div {
       width: 90%;
     }
+    > div:nth-child(2) {
+      display: inline-block;
+      width: 22px;
+      height: 20px;
+      max-width: 22px;
+      max-height: 20px;
+    }
   }
   > div div span:first-of-type {
     user-select: none;
@@ -47,7 +54,7 @@ const headerCSS = css`
   > div div span:last-of-type {
     margin-left: 5px;
   }
-  > div svg {
+  > div > div > svg {
     padding: 0px 3px 0px 3px;
     margin-left: auto;
   }
@@ -79,6 +86,17 @@ const filterIconContainerCSS = css`
   max-width: 15px;
   max-height: 15px;
   position: relative;
+  top: 3px;
+`;
+
+const filterInputContainerCSS = css`
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  max-width: 15px;
+  max-height: 15px;
+  position: relative;
+  left: -20px;
   top: 3px;
 `;
 
@@ -173,6 +191,19 @@ function Listing({ items, name, sort }) {
             <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
           </symbol>
           <symbol
+            id="filter-icon-marked"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="red"
+            stroke="red"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="feather feather-filter"
+          >
+            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+          </symbol>
+          <symbol
             id="cancel-icon"
             version="1.1"
             xmlns="http://www.w3.org/2000/svg"
@@ -227,16 +258,7 @@ c1.424-1.382,4.078-0.95,5.929,0.958c1.857,1.908,2.206,4.577,0.785,5.959l-9.295,9
             spellCheck={false}
           ></input>
           <div
-            style={{
-              display: "inline-block",
-              width: "15px",
-              height: "15px",
-              maxWidth: "15px",
-              maxHeight: "15px",
-              position: "relative",
-              left: "-20px",
-              top: "3px"
-            }}
+            css={filterInputContainerCSS}
             onClick={() => {
               setFilter("");
               setContent(
@@ -255,7 +277,7 @@ c1.424-1.382,4.078-0.95,5.929,0.958c1.857,1.908,2.206,4.577,0.785,5.959l-9.295,9
       ) : (
         false
       )}
-
+      {/* table with items */}
       <table css={tableCSS}>
         <caption css={captitionStyle}>{name}</caption>
         <tbody>
@@ -303,15 +325,7 @@ c1.424-1.382,4.078-0.95,5.929,0.958c1.857,1.908,2.206,4.577,0.785,5.959l-9.295,9
                         </span>
                         <span className="sortable arrow-down"></span>
                       </div>
-                      <div
-                        style={{
-                          display: "inline-block",
-                          width: "22px",
-                          height: "20px",
-                          maxWidth: "22px",
-                          maxHeight: "20px"
-                        }}
-                      >
+                      <div>
                         <svg
                           viewBox="0 0 24 24"
                           onClick={(e) => {
