@@ -112,7 +112,7 @@ const checkboxHeaderCSS = css`
   width: 10px;
 `;
 
-const removeButttonCSS = css`
+const removeButtonCSS = css`
   background: red;
   color: white;
 `;
@@ -232,6 +232,116 @@ function FilterInput({
   );
 }
 
+function TableHeaders({
+  content,
+  setChecked,
+  setContent,
+  checked,
+  sortListing,
+  setFilteredColumn
+}) {
+  return (
+    <tr key="0">
+      {content && content[0] && (
+        <th css={checkboxHeaderCSS}>
+          <label>
+            <input
+              type="checkbox"
+              onClick={(e) => {
+                if (e.target.checked) setChecked(content.length);
+                else setChecked(0);
+                setContent(
+                  [...content].map((c) => {
+                    c.__meta__.checked = e.target.checked;
+                    return c;
+                  })
+                );
+              }}
+            ></input>
+            <button
+              css={removeButtonCSS}
+              style={checked > 0 ? {} : { display: "none" }}
+              onClick={() => {
+                alert("Whoof!");
+              }}
+            >
+              Remove
+            </button>
+          </label>
+        </th>
+      )}
+      {content && content[0] ? (
+        Object.keys(content[0]).map((key, index) => {
+          if (key === "__meta__") {
+            return false;
+          }
+          return (
+            <th key={key} css={headerCSS}>
+              <div>
+                <div>
+                  <span index={index} onClick={sortListing}>
+                    {key}
+                  </span>
+                  <span className="sortable arrow-down"></span>
+                </div>
+                <div>
+                  <svg
+                    viewBox="0 0 24 24"
+                    onClick={(e) => {
+                      setFilteredColumn(key);
+                    }}
+                  >
+                    <use href="#filter-icon" />
+                  </svg>
+                </div>
+              </div>
+            </th>
+          );
+        })
+      ) : (
+        <th>[empty]</th>
+      )}
+    </tr>
+  );
+}
+
+function TableRows({ content, setChecked, checked }) {
+  return (
+    <>
+      {" "}
+      {content.map((item, index) => {
+        return (
+          <tr
+            key={index}
+            css={rowCSS}
+            style={item.__meta__.visible ? {} : { display: "none" }}
+          >
+            <td style={{}}>
+              <label>
+                <input
+                  className="row-input"
+                  type="checkbox"
+                  onClick={(e) => {
+                    if (e.target.checked) setChecked(checked + 1);
+                    else setChecked(checked - 1);
+                    item.__meta__.checked = e.target.checked;
+                  }}
+                  checked={item.__meta__.checked}
+                ></input>
+              </label>
+            </td>
+            {Object.values(item).map((v, i) => {
+              if (Object.keys(item)[i] !== "__meta__") {
+                return <td key={i}>{v}</td>;
+              }
+              return false;
+            })}
+          </tr>
+        );
+      })}
+    </>
+  );
+}
 /* 
   public components
  */
@@ -310,103 +420,22 @@ function Listing({ items, name, sort }) {
       ) : (
         false
       )}
-      {/* table with items */}
       <table css={tableCSS}>
         <caption css={captitionStyle}>{name}</caption>
         <tbody>
-          {/*** columns ***/}
-          <tr key="0">
-            {content && content[0] && (
-              <th css={checkboxHeaderCSS}>
-                <label style={{}}>
-                  <input
-                    type="checkbox"
-                    onClick={(e) => {
-                      if (e.target.checked) setChecked(content.length);
-                      else setChecked(0);
-                      setContent(
-                        [...content].map((c) => {
-                          c.__meta__.checked = e.target.checked;
-                          return c;
-                        })
-                      );
-                    }}
-                  ></input>
-                  <button
-                    css={removeButttonCSS}
-                    style={checked > 0 ? {} : { display: "none" }}
-                    onClick={() => {
-                      alert("Whoof!");
-                    }}
-                  >
-                    Remove
-                  </button>
-                </label>
-              </th>
-            )}
-            {content && content[0] ? (
-              Object.keys(content[0]).map((key, index) => {
-                if (key === "__meta__") {
-                  return false;
-                }
-                return (
-                  <th key={key} css={headerCSS}>
-                    <div>
-                      <div>
-                        <span index={index} onClick={sortListing}>
-                          {key}
-                        </span>
-                        <span className="sortable arrow-down"></span>
-                      </div>
-                      <div>
-                        <svg
-                          viewBox="0 0 24 24"
-                          onClick={(e) => {
-                            setFilteredColumn(key);
-                          }}
-                        >
-                          <use href="#filter-icon" />
-                        </svg>
-                      </div>
-                    </div>
-                  </th>
-                );
-              })
-            ) : (
-              <th>[empty]</th>
-            )}
-          </tr>
-          {/*** rows ***/}
-          {content.map((item, index) => {
-            return (
-              <tr
-                key={index}
-                css={rowCSS}
-                style={item.__meta__.visible ? {} : { display: "none" }}
-              >
-                <td style={{}}>
-                  <label>
-                    <input
-                      className="row-input"
-                      type="checkbox"
-                      onClick={(e) => {
-                        if (e.target.checked) setChecked(checked + 1);
-                        else setChecked(checked - 1);
-                        item.__meta__.checked = e.target.checked;
-                      }}
-                      checked={item.__meta__.checked}
-                    ></input>
-                  </label>
-                </td>
-                {Object.values(item).map((v, i) => {
-                  if (Object.keys(item)[i] !== "__meta__") {
-                    return <td key={i}>{v}</td>;
-                  }
-                  return false;
-                })}
-              </tr>
-            );
-          })}
+          <TableHeaders
+            content={content}
+            setChecked={setChecked}
+            setContent={setContent}
+            checked={checked}
+            sortListing={sortListing}
+            setFilteredColumn={setFilteredColumn}
+          />
+          <TableRows
+            content={content}
+            setChecked={setChecked}
+            checked={checked}
+          />
         </tbody>
       </table>
     </>
