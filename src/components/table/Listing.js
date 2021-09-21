@@ -3,6 +3,9 @@ import { useEffect, useState } from "react";
 import { css } from "@emotion/react";
 import "./listing.css";
 
+/*
+  CSS-in-JS
+ */
 const captitionStyle = css`
   background: #ddd;
   padding: 5px;
@@ -113,7 +116,9 @@ const removeButttonCSS = css`
   background: red;
   color: white;
 `;
-
+/* 
+  internal components
+ */
 function Icons() {
   return (
     <svg style={{ display: "none" }} version="2.0">
@@ -165,6 +170,71 @@ c1.424-1.382,4.078-0.95,5.929,0.958c1.857,1.908,2.206,4.577,0.785,5.959l-9.295,9
   );
 }
 
+function FilterInput({
+  filteredColumn,
+  filter,
+  setFilter,
+  setContent,
+  content
+}) {
+  return (
+    <label css={labelFilterCSS}>
+      <div css={filterIconContainerCSS}>
+        <svg viewBox="0 0 24 24">
+          <use href="#filter-icon" />
+        </svg>
+      </div>
+      {filteredColumn}
+      {": "}
+      <input
+        type="text"
+        placeholder="...enter filter..."
+        css={inputFilterCSS}
+        value={filter}
+        onChange={(e) => {
+          const newFilter = e.target.value;
+          setFilter(newFilter);
+          setContent(
+            Array.from(content).map((c) => {
+              if (
+                c[filteredColumn]
+                  .toLowerCase()
+                  .startsWith(newFilter.toLowerCase())
+              ) {
+                c.__meta__.visible = true;
+              } else {
+                c.__meta__.visible = false;
+              }
+              return c;
+            })
+          );
+        }}
+        autoFocus
+        spellCheck={false}
+      ></input>
+      <div
+        css={filterInputContainerCSS}
+        onClick={() => {
+          setFilter("");
+          setContent(
+            [...content].map((c) => {
+              c.__meta__.visible = true;
+              return c;
+            })
+          );
+        }}
+      >
+        <svg viewBox="0 0 72.434 72.44">
+          <use href="#cancel-icon" />
+        </svg>
+      </div>
+    </label>
+  );
+}
+
+/* 
+  public components
+ */
 function Listing({ items, name, sort }) {
   const [content, setContent] = useState([]);
   const [currentCol, setCurrentCol] = useState(-1);
@@ -228,60 +298,15 @@ function Listing({ items, name, sort }) {
 
   return (
     <>
-      {Icons()}
-      {/*** filtering ***/}
+      <Icons />
       {filteredColumn ? (
-        <label css={labelFilterCSS}>
-          <div css={filterIconContainerCSS}>
-            <svg viewBox="0 0 24 24">
-              <use href="#filter-icon" />
-            </svg>
-          </div>
-          {filteredColumn}
-          {": "}
-          <input
-            type="text"
-            placeholder="...enter filter..."
-            css={inputFilterCSS}
-            value={filter}
-            onChange={(e) => {
-              const newFilter = e.target.value;
-              setFilter(newFilter);
-              setContent(
-                Array.from(content).map((c) => {
-                  if (
-                    c[filteredColumn]
-                      .toLowerCase()
-                      .startsWith(newFilter.toLowerCase())
-                  ) {
-                    c.__meta__.visible = true;
-                  } else {
-                    c.__meta__.visible = false;
-                  }
-                  return c;
-                })
-              );
-            }}
-            autoFocus
-            spellCheck={false}
-          ></input>
-          <div
-            css={filterInputContainerCSS}
-            onClick={() => {
-              setFilter("");
-              setContent(
-                [...content].map((c) => {
-                  c.__meta__.visible = true;
-                  return c;
-                })
-              );
-            }}
-          >
-            <svg viewBox="0 0 72.434 72.44">
-              <use href="#cancel-icon" />
-            </svg>
-          </div>
-        </label>
+        <FilterInput
+          filteredColumn={filteredColumn}
+          filter={filter}
+          setFilter={setFilter}
+          setContent={setContent}
+          content={content}
+        />
       ) : (
         false
       )}
