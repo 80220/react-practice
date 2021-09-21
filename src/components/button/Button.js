@@ -38,7 +38,10 @@ function LoadingButton(props) {
       css={style}
       onClick={async () => {
         setDisabled(true);
-        await action();
+        await action().catch((e) => {
+          console.error(e);
+          setDisabled(false);
+        });
         setDisabled(false);
       }}
       disabled={disabled}

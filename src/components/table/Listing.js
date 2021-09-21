@@ -308,7 +308,6 @@ function TableHeaders({
 function TableRows({ content, setChecked, checked }) {
   return (
     <>
-      {" "}
       {content.map((item, index) => {
         return (
           <tr

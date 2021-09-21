@@ -152,7 +152,6 @@ export default function App() {
         <SimpleButton
           css={loadButtonCSS}
           action={() => {
-            console.log("inputLimit.current.value", inputLimit.current.value);
             setLimit(parseInt(inputLimit.current.value, 10));
             setLoadButtonDisabled(true);
           }}
