@@ -4,7 +4,7 @@ import { css } from "@emotion/react";
 import Listing from "./components/table/Listing";
 import SimpleButton, { LoadingButton } from "./components/button/Button";
 import NumericInput from "./components/form/numericInput";
-
+import Diagram from "./components/diagram/Diagram";
 import axios from "axios";
 import "./styles.css";
 
@@ -42,9 +42,11 @@ export default function App() {
   const fetch = useCallback(async (quantity) => {
     console.log("......Fetching.......", quantity, "spy(ies)");
     const URL = "https://randomuser.me/api/?results=" + quantity;
-    const {
-      data: { results }
-    } = await axios.get(URL);
+    const data = await axios.get(URL).catch((e) => {
+      alert(e.message);
+    });
+    if (!data) return [];
+    const results = data.result;
     console.log(results);
     const names = results.map((item) => {
       return {
@@ -175,6 +177,8 @@ export default function App() {
           name="List of citizens"
         />
       </div>
+      <p>Diagram:</p>
+      <Diagram size="300px" />
     </div>
   );
 }
