@@ -20,6 +20,9 @@ const base = css`
 
 function LoadingButton(props) {
   const { action, label, className } = props;
+  if (action.constructor.name !== "AsyncFunction")
+    throw new Error(`'action' prop must be an async function, ${action}`);
+
   const [disabled, setDisabled] = useState(false);
 
   // default style, can be customized via @classes prop

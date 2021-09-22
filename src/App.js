@@ -167,8 +167,8 @@ export default function App() {
           }}
           label="more"
         />
-        <LoadingButton css={lessButtonCSS} action={less} label="less" />
-        <LoadingButton css={clearButtonCSS} action={clear} label="clear" />
+        <SimpleButton css={lessButtonCSS} action={less} label="less" />
+        <SimpleButton css={clearButtonCSS} action={clear} label="clear" />
       </div>
       <div>
         <Listing
