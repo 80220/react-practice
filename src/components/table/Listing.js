@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { css } from "@emotion/react";
 import "./listing.css";
 
@@ -223,7 +223,8 @@ function TableHeaders({
   setChecked,
   checked,
   sortListing,
-  setFilteredColumn
+  setFilteredColumn,
+  masterFilterCheckbox
 }) {
   return (
     <tr key="0">
@@ -231,12 +232,14 @@ function TableHeaders({
         <th css={checkboxHeaderCSS}>
           <label>
             <input
+              ref={masterFilterCheckbox}
               type="checkbox"
               onClick={(e) => {
                 if (e.target.checked) setChecked(content.length);
                 else setChecked(0);
                 meta.forEach((m) => (m.checked = e.target.checked));
               }}
+              // checked={checked === 0 ? false : true}
             ></input>
             <button
               css={removeButtonCSS}
@@ -282,7 +285,13 @@ function TableHeaders({
   );
 }
 
-function TableRows({ content, setChecked, checked, meta }) {
+function TableRows({
+  content,
+  setChecked,
+  checked,
+  meta,
+  masterFilterCheckbox
+}) {
   return (
     <>
       {content.map((item, index) => {
@@ -299,7 +308,10 @@ function TableRows({ content, setChecked, checked, meta }) {
                   type="checkbox"
                   onClick={(e) => {
                     if (e.target.checked) setChecked(checked + 1);
-                    else setChecked(checked - 1);
+                    else {
+                      setChecked(checked - 1);
+                      masterFilterCheckbox.current.checked = false;
+                    }
                     meta[index].checked = e.target.checked;
                   }}
                   checked={meta[index].checked}
@@ -318,7 +330,7 @@ function TableRows({ content, setChecked, checked, meta }) {
 /* 
   public components
  */
-function Listing({ items, name, sort }) {
+function Listing({ items, name, sortFunc }) {
   const [content, setContent] = useState([]);
   const [currentCol, setCurrentCol] = useState(-1);
   const [direction, setDirection] = useState(false);
@@ -326,6 +338,7 @@ function Listing({ items, name, sort }) {
   const [filteredColumn, setFilteredColumn] = useState(false);
   const [checked, setChecked] = useState(0);
   const [meta, setMeta] = useState([]);
+  const masterFilterCheckbox = useRef(null);
 
   const clearSorting = () => {
     const allHeaders = document.getElementsByClassName("sortable");
@@ -342,7 +355,7 @@ function Listing({ items, name, sort }) {
     clearSorting();
     const selectedColumn = parseInt(header.getAttribute("index"), 10);
     const key = Object.keys(content[0])[selectedColumn];
-    setContent(sort(content, direction, key));
+    setContent(sortFunc(content, direction, key));
 
     if (currentCol === -1) {
       arrowIcon.classList.add("arrow-down-active");
@@ -407,12 +420,14 @@ function Listing({ items, name, sort }) {
             setFilteredColumn={setFilteredColumn}
             checked={checked}
             sortListing={sortListing}
+            masterFilterCheckbox={masterFilterCheckbox}
           />
           <TableRows
             content={content}
             meta={meta}
             setChecked={setChecked}
             checked={checked}
+            masterFilterCheckbox={masterFilterCheckbox}
           />
         </tbody>
       </table>

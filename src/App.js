@@ -173,7 +173,7 @@ export default function App() {
       <div>
         <Listing
           items={items}
-          sort={sortItemsDefault}
+          sortFunc={sortItemsDefault}
           name="List of citizens"
         />
       </div>
