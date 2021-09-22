@@ -132,7 +132,6 @@ function Icons() {
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          // class="feather feather-filter"
         >
           <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
         </symbol>
@@ -145,7 +144,6 @@ function Icons() {
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          // class="feather feather-filter"
         >
           <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
         </symbol>
@@ -170,13 +168,8 @@ c1.424-1.382,4.078-0.95,5.929,0.958c1.857,1.908,2.206,4.577,0.785,5.959l-9.295,9
   );
 }
 
-function FilterInput({
-  filteredColumn,
-  filter,
-  setFilter,
-  setContent,
-  content
-}) {
+function FilterInput({ filteredColumn, filter, setFilter, content, meta }) {
+  console.log("FilterInput", content, meta);
   return (
     <label css={labelFilterCSS}>
       <div css={filterIconContainerCSS}>
@@ -194,20 +187,17 @@ function FilterInput({
         onChange={(e) => {
           const newFilter = e.target.value;
           setFilter(newFilter);
-          setContent(
-            Array.from(content).map((c) => {
-              if (
-                c[filteredColumn]
-                  .toLowerCase()
-                  .startsWith(newFilter.toLowerCase())
-              ) {
-                c.__meta__.visible = true;
-              } else {
-                c.__meta__.visible = false;
-              }
-              return c;
-            })
-          );
+          content.forEach((c, index) => {
+            if (
+              c[filteredColumn]
+                .toLowerCase()
+                .startsWith(newFilter.toLowerCase())
+            ) {
+              meta[index].visible = true;
+            } else {
+              meta[index].visible = false;
+            }
+          });
         }}
         autoFocus
         spellCheck={false}
@@ -216,12 +206,7 @@ function FilterInput({
         css={filterInputContainerCSS}
         onClick={() => {
           setFilter("");
-          setContent(
-            [...content].map((c) => {
-              c.__meta__.visible = true;
-              return c;
-            })
-          );
+          meta.forEach((m) => (m.visible = true));
         }}
       >
         <svg viewBox="0 0 72.434 72.44">
@@ -234,8 +219,8 @@ function FilterInput({
 
 function TableHeaders({
   content,
+  meta,
   setChecked,
-  setContent,
   checked,
   sortListing,
   setFilteredColumn
@@ -250,12 +235,7 @@ function TableHeaders({
               onClick={(e) => {
                 if (e.target.checked) setChecked(content.length);
                 else setChecked(0);
-                setContent(
-                  [...content].map((c) => {
-                    c.__meta__.checked = e.target.checked;
-                    return c;
-                  })
-                );
+                meta.forEach((m) => (m.checked = e.target.checked));
               }}
             ></input>
             <button
@@ -272,9 +252,6 @@ function TableHeaders({
       )}
       {content && content[0] ? (
         Object.keys(content[0]).map((key, index) => {
-          if (key === "__meta__") {
-            return false;
-          }
           return (
             <th key={key} css={headerCSS}>
               <div>
@@ -305,7 +282,7 @@ function TableHeaders({
   );
 }
 
-function TableRows({ content, setChecked, checked }) {
+function TableRows({ content, setChecked, checked, meta }) {
   return (
     <>
       {content.map((item, index) => {
@@ -313,7 +290,7 @@ function TableRows({ content, setChecked, checked }) {
           <tr
             key={index}
             css={rowCSS}
-            style={item.__meta__.visible ? {} : { display: "none" }}
+            style={meta[index].visible ? {} : { display: "none" }}
           >
             <td style={{}}>
               <label>
@@ -323,17 +300,14 @@ function TableRows({ content, setChecked, checked }) {
                   onClick={(e) => {
                     if (e.target.checked) setChecked(checked + 1);
                     else setChecked(checked - 1);
-                    item.__meta__.checked = e.target.checked;
+                    meta[index].checked = e.target.checked;
                   }}
-                  checked={item.__meta__.checked}
+                  checked={meta[index].checked}
                 ></input>
               </label>
             </td>
             {Object.values(item).map((v, i) => {
-              if (Object.keys(item)[i] !== "__meta__") {
-                return <td key={i}>{v}</td>;
-              }
-              return false;
+              return <td key={i}>{v}</td>;
             })}
           </tr>
         );
@@ -351,6 +325,7 @@ function Listing({ items, name, sort }) {
   const [filter, setFilter] = useState("");
   const [filteredColumn, setFilteredColumn] = useState(false);
   const [checked, setChecked] = useState(0);
+  const [meta, setMeta] = useState([]);
 
   const clearSorting = () => {
     const allHeaders = document.getElementsByClassName("sortable");
@@ -389,15 +364,16 @@ function Listing({ items, name, sort }) {
   };
 
   useEffect(() => {
-    console.log("Listing rendering", content);
+    console.log("Listing rendering, content", content, "meta", meta);
   });
 
   useEffect(() => {
     clearSorting();
-    setContent(
-      items.map((item) => {
-        return { __meta__: { visible: true, checked: false }, ...item };
-      })
+    setContent(items);
+    setMeta(
+      Array(items.length)
+        .fill()
+        .map((i) => ({ visible: true, checked: false }))
     );
     if (items.length === 0) {
       setFilteredColumn(null);
@@ -410,11 +386,12 @@ function Listing({ items, name, sort }) {
       <Icons />
       {filteredColumn ? (
         <FilterInput
+          content={content}
+          meta={meta}
           filteredColumn={filteredColumn}
           filter={filter}
           setFilter={setFilter}
           setContent={setContent}
-          content={content}
         />
       ) : (
         false
@@ -424,14 +401,16 @@ function Listing({ items, name, sort }) {
         <tbody>
           <TableHeaders
             content={content}
+            meta={meta}
             setChecked={setChecked}
             setContent={setContent}
+            setFilteredColumn={setFilteredColumn}
             checked={checked}
             sortListing={sortListing}
-            setFilteredColumn={setFilteredColumn}
           />
           <TableRows
             content={content}
+            meta={meta}
             setChecked={setChecked}
             checked={checked}
           />

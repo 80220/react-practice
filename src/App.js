@@ -46,7 +46,8 @@ export default function App() {
       alert(e.message);
     });
     if (!data) return [];
-    const results = data.result;
+    // console.log(data);
+    const results = data.data.results;
     console.log(results);
     const names = results.map((item) => {
       return {
@@ -176,8 +177,10 @@ export default function App() {
           name="List of citizens"
         />
       </div>
-      <p>Diagram:</p>
-      <Diagram size="300px" />
+      {/* <p style={{ fontFamily: "Tahoma", fontSize: "0.7em", fontWeight: "700" }}>
+        Diagram:
+      </p> */}
+      {/* <Diagram size="700px" /> */}
     </div>
   );
 }

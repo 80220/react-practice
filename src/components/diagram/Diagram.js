@@ -11,8 +11,10 @@ function Diagram({ size }) {
         onMouseMove={(e) => {
           const canvas = e.target;
           const rect = canvas.getBoundingClientRect();
-          const x = e.clientX - rect.x;
-          const y = e.clientY - rect.y;
+          const x = e.clientX - Math.floor(rect.x);
+          // console.log("e.clientY, rect.y", e.clientY, rect.y);
+          const y = e.clientY - Math.floor(rect.y);
+
           console.log("(x,y)=(", x, ",", y, ")");
         }}
       ></canvas>
