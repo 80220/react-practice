@@ -235,11 +235,19 @@ function TableHeaders({
               ref={masterFilterCheckbox}
               type="checkbox"
               onClick={(e) => {
-                if (e.target.checked) setChecked(content.length);
+                const visibleNum = meta.reduce(function (
+                  previousValue,
+                  currentValue
+                ) {
+                  return previousValue + (currentValue.visible ? 1 : 0);
+                },
+                0);
+                if (e.target.checked) setChecked(visibleNum);
                 else setChecked(0);
-                meta.forEach((m) => (m.checked = e.target.checked));
+                meta.forEach((m) =>
+                  m.visible ? (m.checked = e.target.checked) : false
+                );
               }}
-              // checked={checked === 0 ? false : true}
             ></input>
             <button
               css={removeButtonCSS}
