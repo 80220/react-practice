@@ -227,8 +227,19 @@ function TableHeaders({
   setFilteredColumn,
   masterFilterCheckbox
 }) {
+  const checkBoxClick = (e) => {
+    const visibleNum = meta.reduce(function (previousValue, currentValue) {
+      return previousValue + (currentValue.visible ? 1 : 0);
+    }, 0);
+    if (e.target.checked) {
+      setChecked(visibleNum);
+    } else {
+      setChecked(0);
+    }
+  };
+
   return (
-    <tr key="0">
+    <tr key="-1">
       {content && content[0] && (
         <th css={checkboxHeaderCSS}>
           <label>
@@ -236,18 +247,10 @@ function TableHeaders({
               ref={masterFilterCheckbox}
               type="checkbox"
               onClick={(e) => {
-                const visibleNum = meta.reduce(function (
-                  previousValue,
-                  currentValue
-                ) {
-                  return previousValue + (currentValue.visible ? 1 : 0);
-                },
-                0);
-                if (e.target.checked) setChecked(visibleNum);
-                else setChecked(0);
-                meta.forEach((m) =>
-                  m.visible ? (m.checked = e.target.checked) : false
-                );
+                checkBoxClick(e);
+                meta.forEach((m) => {
+                  if (m.visible) m.checked = e.target.checked;
+                });
               }}
             ></input>
             <button
@@ -263,13 +266,13 @@ function TableHeaders({
         </th>
       )}
       {content && content[0] ? (
-        Object.keys(content[0]).map((key, index) => {
+        Object.keys(content[0]).map((columnName, index) => {
           return (
-            <th key={key} css={headerCSS}>
+            <th key={index} css={headerCSS}>
               <div>
                 <div>
                   <span index={index} onClick={sortListing}>
-                    {key}
+                    {columnName}
                   </span>
                   <span className="sortable arrow-down"></span>
                 </div>
@@ -277,10 +280,10 @@ function TableHeaders({
                   <svg
                     viewBox="0 0 24 24"
                     onClick={(e) => {
-                      setFilteredColumn(key);
+                      setFilteredColumn(columnName);
                     }}
                   >
-                    {filteredColumn === key ? (
+                    {filteredColumn === columnName ? (
                       <use href="#filter-icon-marked" />
                     ) : (
                       <use href="#filter-icon" />
@@ -305,6 +308,15 @@ function TableRows({
   meta,
   masterFilterCheckbox
 }) {
+  const checkBoxClick = (e) => {
+    if (e.target.checked) {
+      setChecked(checked + 1);
+    } else {
+      setChecked(checked - 1);
+      masterFilterCheckbox.current.checked = false;
+    }
+  };
+
   return (
     <>
       {content.map((item, index) => {
@@ -320,11 +332,7 @@ function TableRows({
                   className="row-input"
                   type="checkbox"
                   onClick={(e) => {
-                    if (e.target.checked) setChecked(checked + 1);
-                    else {
-                      setChecked(checked - 1);
-                      masterFilterCheckbox.current.checked = false;
-                    }
+                    checkBoxClick(e);
                     meta[index].checked = e.target.checked;
                   }}
                   checked={meta[index].checked}
