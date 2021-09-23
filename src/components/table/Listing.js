@@ -129,7 +129,7 @@ function Icons() {
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          strokeWidth="2"
+          strokeWidth="1"
           strokeLinecap="round"
           strokeLinejoin="round"
         >
@@ -141,7 +141,7 @@ function Icons() {
           viewBox="0 0 24 24"
           fill="rgb(231, 8, 8)"
           stroke="rgb(231, 8, 8)"
-          strokeWidth="2"
+          strokeWidth="1"
           strokeLinecap="round"
           strokeLinejoin="round"
         >
