@@ -7,6 +7,7 @@ import NumericInput from "./components/form/numericInput";
 import Diagram from "./components/diagram/Diagram";
 import axios from "axios";
 import "./styles.css";
+import { nanoid } from "nanoid";
 
 // override default styling of used components
 const baseColorButtonCSS = css`
@@ -51,6 +52,7 @@ export default function App() {
     console.log(results);
     const names = results.map((item) => {
       return {
+        id: nanoid(),
         Title: item.name.title,
         FirstName: item.name.first,
         LastName: item.name.last,

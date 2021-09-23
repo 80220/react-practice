@@ -238,9 +238,20 @@ function TableHeaders({
     }
   };
 
+  const [columnNames, setColumnNames] = useState([]);
+  useEffect(() => {
+    if (content && content[0]) {
+      const { id, ...names } = content[0];
+      console.log(names);
+      setColumnNames(Object.keys(names));
+    } else {
+      setColumnNames([]);
+    }
+  }, [content]);
+
   return (
     <tr key="-1">
-      {content && content[0] && (
+      {columnNames.length > 0 && (
         <th css={checkboxHeaderCSS}>
           <label>
             <input
@@ -265,8 +276,8 @@ function TableHeaders({
           </label>
         </th>
       )}
-      {content && content[0] ? (
-        Object.keys(content[0]).map((columnName, index) => {
+      {columnNames.length > 0 ? (
+        columnNames.map((columnName, index) => {
           return (
             <th key={index} css={headerCSS}>
               <div>
@@ -322,7 +333,7 @@ function TableRows({
       {content.map((item, index) => {
         return (
           <tr
-            key={index}
+            key={item.id}
             css={rowCSS}
             style={meta[index].visible ? {} : { display: "none" }}
           >
@@ -340,7 +351,7 @@ function TableRows({
               </label>
             </td>
             {Object.values(item).map((v, i) => {
-              return <td key={i}>{v}</td>;
+              return item.id !== v ? <td key={i}>{v}</td> : false;
             })}
           </tr>
         );
@@ -360,6 +371,8 @@ function Listing({ items, name, sortFunc }) {
   const [checked, setChecked] = useState(0);
   const [meta, setMeta] = useState([]);
   const masterFilterCheckbox = useRef(null);
+
+  //TODO check if id present for item
 
   const clearSorting = () => {
     const allHeaders = document.getElementsByClassName("sortable");
