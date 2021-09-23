@@ -139,8 +139,8 @@ function Icons() {
           id="filter-icon-marked"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
-          fill="red"
-          stroke="red"
+          fill="rgb(231, 8, 8)"
+          stroke="rgb(231, 8, 8)"
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -223,6 +223,7 @@ function TableHeaders({
   setChecked,
   checked,
   sortListing,
+  filteredColumn,
   setFilteredColumn,
   masterFilterCheckbox
 }) {
@@ -279,7 +280,11 @@ function TableHeaders({
                       setFilteredColumn(key);
                     }}
                   >
-                    <use href="#filter-icon" />
+                    {filteredColumn === key ? (
+                      <use href="#filter-icon-marked" />
+                    ) : (
+                      <use href="#filter-icon" />
+                    )}
                   </svg>
                 </div>
               </div>
@@ -425,6 +430,7 @@ function Listing({ items, name, sortFunc }) {
             meta={meta}
             setChecked={setChecked}
             setContent={setContent}
+            filteredColumn={filteredColumn}
             setFilteredColumn={setFilteredColumn}
             checked={checked}
             sortListing={sortListing}
