@@ -220,6 +220,8 @@ function FilterInput({ filteredColumn, filter, setFilter, content, meta }) {
 function TableHeaders({
   content,
   meta,
+  setContent,
+  setMeta,
   setChecked,
   checked,
   sortListing,
@@ -242,7 +244,6 @@ function TableHeaders({
   useEffect(() => {
     if (content && content[0]) {
       const { id, ...names } = content[0];
-      console.log(names);
       setColumnNames(Object.keys(names));
     } else {
       setColumnNames([]);
@@ -268,7 +269,18 @@ function TableHeaders({
               css={removeButtonCSS}
               style={checked > 0 ? {} : { display: "none" }}
               onClick={() => {
-                alert("Whoof!");
+                const newContent = [];
+                const newMeta = [];
+                meta.forEach((i, index) => {
+                  if (i.checked !== true) {
+                    newContent.push(content[index]);
+                    newMeta.push(meta[index]);
+                  }
+                });
+                setContent(newContent);
+                setMeta(newMeta);
+                setChecked(0);
+                masterFilterCheckbox.current.checked = false;
               }}
             >
               Remove
@@ -388,7 +400,8 @@ function Listing({ items, name, sortFunc }) {
     const arrowIcon = header.nextSibling;
     clearSorting();
     const selectedColumn = parseInt(header.getAttribute("index"), 10);
-    const key = Object.keys(content[0])[selectedColumn];
+    const shift = 1;
+    const key = Object.keys(content[0])[selectedColumn + shift];
     setContent(sortFunc(content, direction, key));
 
     if (currentCol === -1) {
@@ -416,6 +429,9 @@ function Listing({ items, name, sortFunc }) {
 
   useEffect(() => {
     clearSorting();
+    if (masterFilterCheckbox && masterFilterCheckbox.current)
+      masterFilterCheckbox.current.checked = false;
+    setChecked(0);
     setContent(items);
     setMeta(
       Array(items.length)
@@ -451,6 +467,7 @@ function Listing({ items, name, sortFunc }) {
             meta={meta}
             setChecked={setChecked}
             setContent={setContent}
+            setMeta={setMeta}
             filteredColumn={filteredColumn}
             setFilteredColumn={setFilteredColumn}
             checked={checked}
