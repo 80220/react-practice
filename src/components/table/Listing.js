@@ -169,7 +169,6 @@ c1.424-1.382,4.078-0.95,5.929,0.958c1.857,1.908,2.206,4.577,0.785,5.959l-9.295,9
 }
 
 function FilterInput({ filteredColumn, filter, setFilter, content, meta }) {
-  console.log("FilterInput", content, meta);
   return (
     <label css={labelFilterCSS}>
       <div css={filterIconContainerCSS}>
@@ -219,8 +218,8 @@ function FilterInput({ filteredColumn, filter, setFilter, content, meta }) {
 
 function TableHeaders({
   content,
-  meta,
   setContent,
+  meta,
   setMeta,
   setChecked,
   checked,
@@ -339,7 +338,6 @@ function TableRows({
       masterFilterCheckbox.current.checked = false;
     }
   };
-
   return (
     <>
       {content.map((item, index) => {
@@ -374,17 +372,18 @@ function TableRows({
 /* 
   public components
  */
-function Listing({ items, name, sortFunc }) {
-  const [content, setContent] = useState([]);
+function Listing({ items, setItems, name, sortFunc }) {
+  const [meta, setMeta] = useState(
+    Array(items.length)
+      .fill()
+      .map(() => ({ visible: true, checked: false }))
+  );
   const [currentCol, setCurrentCol] = useState(-1);
   const [direction, setDirection] = useState(false);
-  const [filter, setFilter] = useState("");
+  const [filter, setFilter] = useState(null);
   const [filteredColumn, setFilteredColumn] = useState(false);
   const [checked, setChecked] = useState(0);
-  const [meta, setMeta] = useState([]);
   const masterFilterCheckbox = useRef(null);
-
-  //TODO check if id present for item
 
   const clearSorting = () => {
     const allHeaders = document.getElementsByClassName("sortable");
@@ -395,14 +394,14 @@ function Listing({ items, name, sortFunc }) {
   };
 
   const sortListing = (e) => {
-    if (content.length <= 1) return;
+    if (items.length <= 1) return;
     const header = e.target;
     const arrowIcon = header.nextSibling;
     clearSorting();
     const selectedColumn = parseInt(header.getAttribute("index"), 10);
     const shift = 1;
-    const key = Object.keys(content[0])[selectedColumn + shift];
-    setContent(sortFunc(content, direction, key));
+    const key = Object.keys(items[0])[selectedColumn + shift];
+    setItems(sortFunc(items, direction, key));
 
     if (currentCol === -1) {
       arrowIcon.classList.add("arrow-down-active");
@@ -424,15 +423,12 @@ function Listing({ items, name, sortFunc }) {
   };
 
   useEffect(() => {
-    console.log("Listing rendering, content", content, "meta", meta);
+    console.log("Listing rendering, content", items, "meta", meta);
   });
 
   useEffect(() => {
-    clearSorting();
     if (masterFilterCheckbox && masterFilterCheckbox.current)
       masterFilterCheckbox.current.checked = false;
-    setChecked(0);
-    setContent(items);
     setMeta(
       Array(items.length)
         .fill()
@@ -440,21 +436,23 @@ function Listing({ items, name, sortFunc }) {
     );
     if (items.length === 0) {
       setFilteredColumn(null);
-      setChecked(0);
     }
+    setChecked(0);
   }, [items]);
+
+  if (items.length !== meta.length) return false;
 
   return (
     <>
       <Icons />
       {filteredColumn ? (
         <FilterInput
-          content={content}
+          content={items}
           meta={meta}
           filteredColumn={filteredColumn}
           filter={filter}
           setFilter={setFilter}
-          setContent={setContent}
+          setContent={setItems}
         />
       ) : (
         false
@@ -463,10 +461,10 @@ function Listing({ items, name, sortFunc }) {
         <caption css={captitionStyle}>{name}</caption>
         <tbody>
           <TableHeaders
-            content={content}
+            content={items}
             meta={meta}
             setChecked={setChecked}
-            setContent={setContent}
+            setContent={setItems}
             setMeta={setMeta}
             filteredColumn={filteredColumn}
             setFilteredColumn={setFilteredColumn}
@@ -475,7 +473,7 @@ function Listing({ items, name, sortFunc }) {
             masterFilterCheckbox={masterFilterCheckbox}
           />
           <TableRows
-            content={content}
+            content={items}
             meta={meta}
             setChecked={setChecked}
             checked={checked}

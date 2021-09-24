@@ -175,6 +175,7 @@ export default function App() {
       <div>
         <Listing
           items={items}
+          setItems={setItems}
           sortFunc={sortItemsDefault}
           name="List of citizens"
         />
