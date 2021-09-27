@@ -131,7 +131,7 @@ export default function App() {
     }
   };
 
-  const sortItemsDefault = (content, direction, key) => {
+  const sortItemsDefault = useCallback((content, direction, key) => {
     return [...content].sort((a, b) => {
       if (direction) {
         return a[key] < b[key] ? 1 : -1;
@@ -139,7 +139,7 @@ export default function App() {
         return a[key] > b[key] ? 1 : -1;
       }
     });
-  };
+  }, []);
 
   return (
     <div style={{}} className="App">
@@ -174,8 +174,8 @@ export default function App() {
       <div>
         <Listing
           title="List of citizens"
-          value={items}
-          onChange={(i) => setItems(i)}
+          items={items}
+          changeItems={useCallback((i) => setItems(i), [])}
           sortFunc={sortItemsDefault}
         />
       </div>

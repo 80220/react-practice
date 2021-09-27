@@ -225,13 +225,16 @@ function TableHeaders({
   setMeta,
   setCheckedRowsNum,
   checkedRowsNum,
-  sortListing,
-  sortingDirection,
-  sortedColumn,
+  sortFunc,
   filteredColumn,
   setFilteredColumn,
   masterFilterCheckbox
 }) {
+  console.log("TableHeaders initial render");
+  const [columnNames, setColumnNames] = useState([]);
+  const [sortedColumn, setSortedColumn] = useState(-1);
+  const [sortingDirection, setSortingDirection] = useState(false);
+
   const checkBoxClick = (e) => {
     const visibleNum = meta.reduce(function (previousValue, currentValue) {
       return previousValue + (currentValue.visible ? 1 : 0);
@@ -243,7 +246,21 @@ function TableHeaders({
     }
   };
 
-  const [columnNames, setColumnNames] = useState([]);
+  const sortListing = (e) => {
+    if (content.length <= 1) return;
+    const header = e.target;
+    const selectedColumn = parseInt(header.getAttribute("index"), 10);
+    const shift = 1;
+    const key = Object.keys(content[0])[selectedColumn + shift];
+    setContent(sortFunc(content, sortingDirection, key));
+    setSortingDirection(!sortingDirection);
+    setSortedColumn(selectedColumn);
+  };
+
+  useEffect(() => {
+    console.log("TableHeaders mounted");
+  }, []);
+
   useEffect(() => {
     if (content && content[0]) {
       const { id, ...names } = content[0];
@@ -253,6 +270,12 @@ function TableHeaders({
     }
   }, [content]);
 
+  useEffect(() => {
+    console.log("TableHeaders rendered", sortedColumn, sortingDirection);
+    return () => {
+      console.log("TableHeaders cleaned", sortedColumn, sortingDirection);
+    };
+  });
   return (
     <tr key="-1">
       {columnNames.length > 0 && (
@@ -385,62 +408,44 @@ function TableRows({
 /* 
   public components
  */
-function Listing({ value, onChange, title, sortFunc }) {
-  const [meta, setMeta] = useState(
-    Array(value.length)
-      .fill()
-      .map(() => ({ visible: true, checked: false }))
-  );
-  const [sortedColumn, setSortedColumn] = useState(-1);
-  const [sortingDirection, setSortingDirection] = useState(false);
+function Listing({ items, changeItems, title, sortFunc }) {
+  const initialMeta = Array(items.length)
+    .fill()
+    .map(() => ({ visible: true, checked: false }));
+  const [meta, setMeta] = useState(initialMeta);
   const [filter, setFilter] = useState("");
   const [filteredColumn, setFilteredColumn] = useState(null);
   const [checkedRowsNum, setCheckedRowsNum] = useState(0);
   const masterFilterCheckbox = useRef(null);
 
-  const sortListing = (e) => {
-    if (value.length <= 1) return;
-    const header = e.target;
-    const selectedColumn = parseInt(header.getAttribute("index"), 10);
-    const shift = 1;
-    const key = Object.keys(value[0])[selectedColumn + shift];
-    onChange(sortFunc(value, sortingDirection, key));
-    setSortingDirection(!sortingDirection);
-    setSortedColumn(selectedColumn);
-  };
-
-  useEffect(() => {
-    console.log("Listing rendering, content", value, "meta", meta);
-  });
-
   useEffect(() => {
     if (masterFilterCheckbox && masterFilterCheckbox.current)
       masterFilterCheckbox.current.checked = false;
     setMeta(
-      Array(value.length)
+      Array(items.length)
         .fill()
         .map((i) => ({ visible: true, checked: false }))
     );
-    if (value.length === 0) {
+    if (items.length === 0) {
       setFilteredColumn(null);
     }
-  }, [value]);
+  }, [items]);
 
-  // wait till meta is created on component mount
-  // useState() looks to work async
-  if (value.length !== meta.length) return false;
+  useEffect(() => {
+    console.log("Listing rendering, content", items, "meta", meta);
+  });
 
   return (
     <>
       <Icons />
       {filteredColumn ? (
         <FilterInput
-          content={value}
-          meta={meta}
+          content={items}
+          meta={items.length === meta.length ? meta : initialMeta}
           filteredColumn={filteredColumn}
           filter={filter}
           setFilter={setFilter}
-          setContent={onChange}
+          setContent={changeItems}
         />
       ) : (
         false
@@ -449,24 +454,22 @@ function Listing({ value, onChange, title, sortFunc }) {
         <caption css={captitionStyle}>{title}</caption>
         <tbody>
           <TableHeaders
-            content={value}
-            meta={meta}
-            setCheckedRowsNum={setCheckedRowsNum}
-            setContent={onChange}
+            content={items}
+            setContent={changeItems}
+            meta={items.length === meta.length ? meta : initialMeta}
             setMeta={setMeta}
+            sortFunc={sortFunc}
             filteredColumn={filteredColumn}
             setFilteredColumn={setFilteredColumn}
             checkedRowsNum={checkedRowsNum}
-            sortingDirection={sortingDirection}
-            sortedColumn={sortedColumn}
-            sortListing={sortListing}
+            setCheckedRowsNum={setCheckedRowsNum}
             masterFilterCheckbox={masterFilterCheckbox}
           />
           <TableRows
-            content={value}
-            meta={meta}
-            setCheckedRowsNum={setCheckedRowsNum}
+            content={items}
+            meta={items.length === meta.length ? meta : initialMeta}
             checkedRowsNum={checkedRowsNum}
+            setCheckedRowsNum={setCheckedRowsNum}
             masterFilterCheckbox={masterFilterCheckbox}
           />
         </tbody>
