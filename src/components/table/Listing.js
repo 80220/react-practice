@@ -432,7 +432,11 @@ function Listing({ items, changeItems, title, sortFunc }) {
   }, [items]);
 
   useEffect(() => {
-    console.log("Listing rendering, content", items, "meta", meta);
+    console.log("Listing mount");
+  }, []);
+
+  useEffect(() => {
+    console.log("Listing rendering, items", items, "meta", meta);
   });
 
   return (
