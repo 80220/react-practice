@@ -41,15 +41,14 @@ export default function App() {
   const inputLimit = useRef({ current: { value: 0 } });
 
   const fetch = useCallback(async (quantity) => {
-    console.log("......Fetching.......", quantity, "spy(ies)");
+    console.log("......Fetching.......", quantity, "user(s)");
     const URL = "https://randomuser.me/api/?results=" + quantity;
     const data = await axios.get(URL).catch((e) => {
       alert(e.message);
     });
     if (!data) return [];
-    // console.log(data);
     const results = data.data.results;
-    console.log(results);
+    console.log("Fetched results", results);
     const names = results.map((item) => {
       return {
         id: nanoid(),
@@ -174,10 +173,10 @@ export default function App() {
       </div>
       <div>
         <Listing
-          items={items}
-          setItems={setItems}
+          title="List of citizens"
+          value={items}
+          onChange={(i) => setItems(i)}
           sortFunc={sortItemsDefault}
-          name="List of citizens"
         />
       </div>
       {/* <p style={{ fontFamily: "Tahoma", fontSize: "0.7em", fontWeight: "700" }}>

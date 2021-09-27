@@ -1,6 +1,8 @@
 /** @jsxImportSource @emotion/react */
 import { useEffect, useState, useRef } from "react";
 import { css } from "@emotion/react";
+import { nanoid } from "nanoid";
+
 import "./listing.css";
 
 /*
@@ -221,9 +223,11 @@ function TableHeaders({
   setContent,
   meta,
   setMeta,
-  setChecked,
-  checked,
+  setCheckedRowsNum,
+  checkedRowsNum,
   sortListing,
+  sortingDirection,
+  sortedColumn,
   filteredColumn,
   setFilteredColumn,
   masterFilterCheckbox
@@ -233,9 +237,9 @@ function TableHeaders({
       return previousValue + (currentValue.visible ? 1 : 0);
     }, 0);
     if (e.target.checked) {
-      setChecked(visibleNum);
+      setCheckedRowsNum(visibleNum);
     } else {
-      setChecked(0);
+      setCheckedRowsNum(0);
     }
   };
 
@@ -266,7 +270,7 @@ function TableHeaders({
             ></input>
             <button
               css={removeButtonCSS}
-              style={checked > 0 ? {} : { display: "none" }}
+              style={checkedRowsNum > 0 ? {} : { display: "none" }}
               onClick={() => {
                 const newContent = [];
                 const newMeta = [];
@@ -278,7 +282,7 @@ function TableHeaders({
                 });
                 setContent(newContent);
                 setMeta(newMeta);
-                setChecked(0);
+                setCheckedRowsNum(0);
                 masterFilterCheckbox.current.checked = false;
               }}
             >
@@ -290,13 +294,21 @@ function TableHeaders({
       {columnNames.length > 0 ? (
         columnNames.map((columnName, index) => {
           return (
-            <th key={index} css={headerCSS}>
+            <th key={columnName} css={headerCSS}>
               <div>
                 <div>
                   <span index={index} onClick={sortListing}>
                     {columnName}
                   </span>
-                  <span className="sortable arrow-down"></span>
+                  {sortedColumn === index ? (
+                    sortingDirection ? (
+                      <span className="sortable arrow-down arrow-down-active"></span>
+                    ) : (
+                      <span className="sortable arrow-up arrow-up-active"></span>
+                    )
+                  ) : (
+                    <span className="sortable arrow-down"></span>
+                  )}
                 </div>
                 <div>
                   <svg
@@ -325,16 +337,16 @@ function TableHeaders({
 
 function TableRows({
   content,
-  setChecked,
-  checked,
+  setCheckedRowsNum,
+  checkedRowsNum,
   meta,
   masterFilterCheckbox
 }) {
   const checkBoxClick = (e) => {
     if (e.target.checked) {
-      setChecked(checked + 1);
+      setCheckedRowsNum(checkedRowsNum + 1);
     } else {
-      setChecked(checked - 1);
+      setCheckedRowsNum(checkedRowsNum - 1);
       masterFilterCheckbox.current.checked = false;
     }
   };
@@ -357,6 +369,7 @@ function TableRows({
                     meta[index].checked = e.target.checked;
                   }}
                   checked={meta[index].checked}
+                  onChange={(e) => {}}
                 ></input>
               </label>
             </td>
@@ -372,111 +385,88 @@ function TableRows({
 /* 
   public components
  */
-function Listing({ items, setItems, name, sortFunc }) {
+function Listing({ value, onChange, title, sortFunc }) {
   const [meta, setMeta] = useState(
-    Array(items.length)
+    Array(value.length)
       .fill()
       .map(() => ({ visible: true, checked: false }))
   );
-  const [currentCol, setCurrentCol] = useState(-1);
-  const [direction, setDirection] = useState(false);
-  const [filter, setFilter] = useState(null);
-  const [filteredColumn, setFilteredColumn] = useState(false);
-  const [checked, setChecked] = useState(0);
+  const [sortedColumn, setSortedColumn] = useState(-1);
+  const [sortingDirection, setSortingDirection] = useState(false);
+  const [filter, setFilter] = useState("");
+  const [filteredColumn, setFilteredColumn] = useState(null);
+  const [checkedRowsNum, setCheckedRowsNum] = useState(0);
   const masterFilterCheckbox = useRef(null);
 
-  const clearSorting = () => {
-    const allHeaders = document.getElementsByClassName("sortable");
-    Array.prototype.forEach.call(allHeaders, (element) => {
-      const toRemove = ["arrow-up-active", "arrow-down-active"];
-      element.classList.remove(...toRemove);
-    });
-  };
-
   const sortListing = (e) => {
-    if (items.length <= 1) return;
+    if (value.length <= 1) return;
     const header = e.target;
-    const arrowIcon = header.nextSibling;
-    clearSorting();
     const selectedColumn = parseInt(header.getAttribute("index"), 10);
     const shift = 1;
-    const key = Object.keys(items[0])[selectedColumn + shift];
-    setItems(sortFunc(items, direction, key));
-
-    if (currentCol === -1) {
-      arrowIcon.classList.add("arrow-down-active");
-    } else {
-      if (direction) {
-        // ascending
-        arrowIcon.classList.remove("arrow-down");
-        arrowIcon.classList.add("arrow-up");
-        arrowIcon.classList.add("arrow-up-active");
-      } else {
-        // descending
-        arrowIcon.classList.remove("arrow-up");
-        arrowIcon.classList.add("arrow-down");
-        arrowIcon.classList.add("arrow-down-active");
-      }
-    }
-    setDirection(!direction);
-    setCurrentCol(selectedColumn);
+    const key = Object.keys(value[0])[selectedColumn + shift];
+    onChange(sortFunc(value, sortingDirection, key));
+    setSortingDirection(!sortingDirection);
+    setSortedColumn(selectedColumn);
   };
 
   useEffect(() => {
-    console.log("Listing rendering, content", items, "meta", meta);
+    console.log("Listing rendering, content", value, "meta", meta);
   });
 
   useEffect(() => {
     if (masterFilterCheckbox && masterFilterCheckbox.current)
       masterFilterCheckbox.current.checked = false;
     setMeta(
-      Array(items.length)
+      Array(value.length)
         .fill()
         .map((i) => ({ visible: true, checked: false }))
     );
-    if (items.length === 0) {
+    if (value.length === 0) {
       setFilteredColumn(null);
     }
-    setChecked(0);
-  }, [items]);
+  }, [value]);
 
-  if (items.length !== meta.length) return false;
+  // wait till meta is created on component mount
+  // useState() looks to work async
+  if (value.length !== meta.length) return false;
 
   return (
     <>
       <Icons />
       {filteredColumn ? (
         <FilterInput
-          content={items}
+          content={value}
           meta={meta}
           filteredColumn={filteredColumn}
           filter={filter}
           setFilter={setFilter}
-          setContent={setItems}
+          setContent={onChange}
         />
       ) : (
         false
       )}
       <table css={tableCSS}>
-        <caption css={captitionStyle}>{name}</caption>
+        <caption css={captitionStyle}>{title}</caption>
         <tbody>
           <TableHeaders
-            content={items}
+            content={value}
             meta={meta}
-            setChecked={setChecked}
-            setContent={setItems}
+            setCheckedRowsNum={setCheckedRowsNum}
+            setContent={onChange}
             setMeta={setMeta}
             filteredColumn={filteredColumn}
             setFilteredColumn={setFilteredColumn}
-            checked={checked}
+            checkedRowsNum={checkedRowsNum}
+            sortingDirection={sortingDirection}
+            sortedColumn={sortedColumn}
             sortListing={sortListing}
             masterFilterCheckbox={masterFilterCheckbox}
           />
           <TableRows
-            content={items}
+            content={value}
             meta={meta}
-            setChecked={setChecked}
-            checked={checked}
+            setCheckedRowsNum={setCheckedRowsNum}
+            checkedRowsNum={checkedRowsNum}
             masterFilterCheckbox={masterFilterCheckbox}
           />
         </tbody>
