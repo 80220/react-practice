@@ -170,7 +170,8 @@ c1.424-1.382,4.078-0.95,5.929,0.958c1.857,1.908,2.206,4.577,0.785,5.959l-9.295,9
   );
 }
 
-function FilterInput({ filteredColumn, filter, setFilter, content, meta }) {
+function FilterInput({ content, meta, setMeta, filteredColumn }) {
+  const [filter, setFilter] = useState("");
   return (
     <label css={labelFilterCSS}>
       <div css={filterIconContainerCSS}>
@@ -199,6 +200,7 @@ function FilterInput({ filteredColumn, filter, setFilter, content, meta }) {
               meta[index].visible = false;
             }
           });
+          setMeta([...meta]);
         }}
         autoFocus
         spellCheck={false}
@@ -208,6 +210,7 @@ function FilterInput({ filteredColumn, filter, setFilter, content, meta }) {
         onClick={() => {
           setFilter("");
           meta.forEach((m) => (m.visible = true));
+          setMeta([...meta]);
         }}
       >
         <svg viewBox="0 0 72.434 72.44">
@@ -413,7 +416,6 @@ function Listing({ items, changeItems, title, sortFunc }) {
     .fill()
     .map(() => ({ visible: true, checked: false }));
   const [meta, setMeta] = useState(initialMeta);
-  const [filter, setFilter] = useState("");
   const [filteredColumn, setFilteredColumn] = useState(null);
   const [checkedRowsNum, setCheckedRowsNum] = useState(0);
   const masterFilterCheckbox = useRef(null);
@@ -446,10 +448,8 @@ function Listing({ items, changeItems, title, sortFunc }) {
         <FilterInput
           content={items}
           meta={items.length === meta.length ? meta : initialMeta}
+          setMeta={setMeta}
           filteredColumn={filteredColumn}
-          filter={filter}
-          setFilter={setFilter}
-          setContent={changeItems}
         />
       ) : (
         false
