@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { css } from "@emotion/react";
 import { nanoid } from "nanoid";
 
@@ -170,7 +170,7 @@ c1.424-1.382,4.078-0.95,5.929,0.958c1.857,1.908,2.206,4.577,0.785,5.959l-9.295,9
   );
 }
 
-function FilterInput({ content, meta, setMeta, filteredColumn }) {
+function FilterInput({ content, setContent, filteredColumn }) {
   const [filter, setFilter] = useState("");
   return (
     <label css={labelFilterCSS}>
@@ -189,18 +189,18 @@ function FilterInput({ content, meta, setMeta, filteredColumn }) {
         onChange={(e) => {
           const newFilter = e.target.value;
           setFilter(newFilter);
-          content.forEach((c, index) => {
+          content.forEach((c) => {
             if (
               c[filteredColumn]
                 .toLowerCase()
                 .startsWith(newFilter.toLowerCase())
             ) {
-              meta[index].visible = true;
+              c.__meta__.visible = true;
             } else {
-              meta[index].visible = false;
+              c.__meta__.visible = false;
             }
           });
-          setMeta([...meta]);
+          setContent([...content]);
         }}
         autoFocus
         spellCheck={false}
@@ -209,8 +209,8 @@ function FilterInput({ content, meta, setMeta, filteredColumn }) {
         css={filterInputContainerCSS}
         onClick={() => {
           setFilter("");
-          meta.forEach((m) => (m.visible = true));
-          setMeta([...meta]);
+          content.forEach((c) => (c.__meta__.visible = true));
+          setContent([...content]);
         }}
       >
         <svg viewBox="0 0 72.434 72.44">
@@ -224,8 +224,6 @@ function FilterInput({ content, meta, setMeta, filteredColumn }) {
 function TableHeaders({
   content,
   setContent,
-  meta,
-  setMeta,
   setCheckedRowsNum,
   checkedRowsNum,
   sortFunc,
@@ -233,14 +231,13 @@ function TableHeaders({
   setFilteredColumn,
   masterFilterCheckbox
 }) {
-  console.log("TableHeaders initial render");
   const [columnNames, setColumnNames] = useState([]);
   const [sortedColumn, setSortedColumn] = useState(-1);
   const [sortingDirection, setSortingDirection] = useState(false);
 
   const checkBoxClick = (e) => {
-    const visibleNum = meta.reduce(function (previousValue, currentValue) {
-      return previousValue + (currentValue.visible ? 1 : 0);
+    const visibleNum = content.reduce(function (previousValue, currentValue) {
+      return previousValue + (currentValue.__meta__.visible ? 1 : 0);
     }, 0);
     if (e.target.checked) {
       setCheckedRowsNum(visibleNum);
@@ -253,20 +250,17 @@ function TableHeaders({
     if (content.length <= 1) return;
     const header = e.target;
     const selectedColumn = parseInt(header.getAttribute("index"), 10);
-    const shift = 1;
-    const key = Object.keys(content[0])[selectedColumn + shift];
+    const key = Object.keys(content[0])[selectedColumn];
     setContent(sortFunc(content, sortingDirection, key));
     setSortingDirection(!sortingDirection);
     setSortedColumn(selectedColumn);
   };
 
-  useEffect(() => {
-    console.log("TableHeaders mounted");
-  }, []);
+  useEffect(() => {}, []);
 
   useEffect(() => {
     if (content && content[0]) {
-      const { id, ...names } = content[0];
+      const { __meta__, ...names } = content[0];
       setColumnNames(Object.keys(names));
     } else {
       setColumnNames([]);
@@ -274,10 +268,7 @@ function TableHeaders({
   }, [content]);
 
   useEffect(() => {
-    console.log("TableHeaders rendered", sortedColumn, sortingDirection);
-    return () => {
-      console.log("TableHeaders cleaned", sortedColumn, sortingDirection);
-    };
+    return () => {};
   });
   return (
     <tr key="-1">
@@ -289,9 +280,10 @@ function TableHeaders({
               type="checkbox"
               onClick={(e) => {
                 checkBoxClick(e);
-                meta.forEach((m) => {
-                  if (m.visible) m.checked = e.target.checked;
+                content.forEach((c) => {
+                  if (c.__meta__.visible) c.__meta__.checked = e.target.checked;
                 });
+                setContent([...content]);
               }}
             ></input>
             <button
@@ -299,15 +291,12 @@ function TableHeaders({
               style={checkedRowsNum > 0 ? {} : { display: "none" }}
               onClick={() => {
                 const newContent = [];
-                const newMeta = [];
-                meta.forEach((i, index) => {
-                  if (i.checked !== true) {
+                content.forEach((i, index) => {
+                  if (i.__meta__.checked !== true) {
                     newContent.push(content[index]);
-                    newMeta.push(meta[index]);
                   }
                 });
                 setContent(newContent);
-                setMeta(newMeta);
                 setCheckedRowsNum(0);
                 masterFilterCheckbox.current.checked = false;
               }}
@@ -365,7 +354,6 @@ function TableRows({
   content,
   setCheckedRowsNum,
   checkedRowsNum,
-  meta,
   masterFilterCheckbox
 }) {
   const checkBoxClick = (e) => {
@@ -378,12 +366,12 @@ function TableRows({
   };
   return (
     <>
-      {content.map((item, index) => {
+      {content.map((item) => {
         return (
           <tr
-            key={item.id}
+            key={item.__meta__.id}
             css={rowCSS}
-            style={meta[index].visible ? {} : { display: "none" }}
+            style={item.__meta__.visible ? {} : { display: "none" }}
           >
             <td style={{}}>
               <label>
@@ -392,15 +380,15 @@ function TableRows({
                   type="checkbox"
                   onClick={(e) => {
                     checkBoxClick(e);
-                    meta[index].checked = e.target.checked;
+                    item.__meta__.checked = e.target.checked;
                   }}
-                  checked={meta[index].checked}
+                  checked={item.__meta__.checked}
                   onChange={(e) => {}}
                 ></input>
               </label>
             </td>
             {Object.values(item).map((v, i) => {
-              return item.id !== v ? <td key={i}>{v}</td> : false;
+              return !v.id ? <td key={i}>{v}</td> : false;
             })}
           </tr>
         );
@@ -412,33 +400,36 @@ function TableRows({
   public components
  */
 function Listing({ items, changeItems, title, sortFunc }) {
-  const initialMeta = Array(items.length)
-    .fill()
-    .map(() => ({ visible: true, checked: false }));
-  const [meta, setMeta] = useState(initialMeta);
   const [filteredColumn, setFilteredColumn] = useState(null);
   const [checkedRowsNum, setCheckedRowsNum] = useState(0);
   const masterFilterCheckbox = useRef(null);
 
+  const initializeData = useCallback(() => {
+    items.forEach((item) => {
+      if (item.__meta__) return;
+      item.__meta__ = {
+        id: nanoid(),
+        visible: true,
+        checked: false
+      };
+    });
+  }, [items]);
+
+  initializeData();
+
   useEffect(() => {
-    if (masterFilterCheckbox && masterFilterCheckbox.current)
-      masterFilterCheckbox.current.checked = false;
-    setMeta(
-      Array(items.length)
-        .fill()
-        .map((i) => ({ visible: true, checked: false }))
-    );
+    initializeData();
     if (items.length === 0) {
       setFilteredColumn(null);
     }
-  }, [items]);
+  }, [items, initializeData]);
 
   useEffect(() => {
     console.log("Listing mount");
   }, []);
 
   useEffect(() => {
-    console.log("Listing rendering, items", items, "meta", meta);
+    console.log("Listing rendering, items", items);
   });
 
   return (
@@ -447,8 +438,7 @@ function Listing({ items, changeItems, title, sortFunc }) {
       {filteredColumn ? (
         <FilterInput
           content={items}
-          meta={items.length === meta.length ? meta : initialMeta}
-          setMeta={setMeta}
+          setContent={changeItems}
           filteredColumn={filteredColumn}
         />
       ) : (
@@ -460,8 +450,6 @@ function Listing({ items, changeItems, title, sortFunc }) {
           <TableHeaders
             content={items}
             setContent={changeItems}
-            meta={items.length === meta.length ? meta : initialMeta}
-            setMeta={setMeta}
             sortFunc={sortFunc}
             filteredColumn={filteredColumn}
             setFilteredColumn={setFilteredColumn}
@@ -471,7 +459,6 @@ function Listing({ items, changeItems, title, sortFunc }) {
           />
           <TableRows
             content={items}
-            meta={items.length === meta.length ? meta : initialMeta}
             checkedRowsNum={checkedRowsNum}
             setCheckedRowsNum={setCheckedRowsNum}
             masterFilterCheckbox={masterFilterCheckbox}
