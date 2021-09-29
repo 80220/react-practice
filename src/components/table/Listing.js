@@ -264,12 +264,6 @@ function TableHeaders({
     sortColumn(selectedColumn);
   };
 
-  if (sortedColumn !== -1 && content.length > 1) {
-    sortFunc(content, sortingDirection, sortedColumnName());
-  }
-
-  console.log("vvvvv");
-
   useEffect(() => {}, []);
 
   useEffect(() => {
@@ -278,8 +272,18 @@ function TableHeaders({
       setColumnNames(Object.keys(names));
     } else {
       setColumnNames([]);
+      setCheckedRowsNum(0);
     }
-  }, [content]);
+  }, [content, setCheckedRowsNum]);
+
+  // useEffect(() => {
+  //   if (sortedColumn !== -1 && content.length > 1) {
+  //     sortFunc(content, sortingDirection, sortedColumnName());
+  //   }
+  // });
+  if (sortedColumn !== -1 && content.length > 1) {
+    sortFunc(content, sortingDirection, sortedColumnName());
+  }
 
   useEffect(() => {
     console.log("TableHeaders rendered");
