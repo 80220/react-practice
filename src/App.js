@@ -130,11 +130,13 @@ export default function App() {
   };
 
   const sortItemsDefault = useCallback((content, direction, key) => {
-    return [...content].sort((a, b) => {
+    return content.sort((a, b) => {
       if (direction) {
-        return a[key] < b[key] ? 1 : -1;
+        // ascending
+        return a[key] < b[key] ? -1 : 1;
       } else {
-        return a[key] > b[key] ? 1 : -1;
+        // descending
+        return a[key] > b[key] ? -1 : 1;
       }
     });
   }, []);

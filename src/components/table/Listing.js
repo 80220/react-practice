@@ -246,15 +246,29 @@ function TableHeaders({
     }
   };
 
-  const sortListing = (e) => {
-    if (content.length <= 1) return;
-    const header = e.target;
-    const selectedColumn = parseInt(header.getAttribute("index"), 10);
-    const key = Object.keys(content[0])[selectedColumn];
-    setContent(sortFunc(content, sortingDirection, key));
+  const sortedColumnName = useCallback(
+    () => Object.keys(content[0])[sortedColumn],
+    [content, sortedColumn]
+  );
+
+  const sortColumn = (selectedColumn) => {
+    setContent([...sortFunc(content, sortingDirection, sortedColumnName())]);
     setSortingDirection(!sortingDirection);
     setSortedColumn(selectedColumn);
   };
+
+  const sortItems = (e) => {
+    if (content.length <= 1) return;
+    const header = e.target;
+    const selectedColumn = parseInt(header.getAttribute("index"), 10);
+    sortColumn(selectedColumn);
+  };
+
+  if (sortedColumn !== -1 && content.length > 1) {
+    sortFunc(content, sortingDirection, sortedColumnName());
+  }
+
+  console.log("vvvvv");
 
   useEffect(() => {}, []);
 
@@ -268,8 +282,10 @@ function TableHeaders({
   }, [content]);
 
   useEffect(() => {
+    console.log("TableHeaders rendered");
     return () => {};
   });
+
   return (
     <tr key="-1">
       {columnNames.length > 0 && (
@@ -312,7 +328,7 @@ function TableHeaders({
             <th key={columnName} css={headerCSS}>
               <div>
                 <div>
-                  <span index={index} onClick={sortListing}>
+                  <span index={index} onClick={sortItems}>
                     {columnName}
                   </span>
                   {sortedColumn === index ? (
