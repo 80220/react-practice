@@ -172,6 +172,15 @@ c1.424-1.382,4.078-0.95,5.929,0.958c1.857,1.908,2.206,4.577,0.785,5.959l-9.295,9
 
 function FilterInput({ content, setContent, filteredColumn }) {
   const [filter, setFilter] = useState("");
+  if (filter !== "") {
+    content.forEach((c) => {
+      if (c[filteredColumn].toLowerCase().startsWith(filter.toLowerCase())) {
+        c.__meta__.visible = true;
+      } else {
+        c.__meta__.visible = false;
+      }
+    });
+  }
   return (
     <label css={labelFilterCSS}>
       <div css={filterIconContainerCSS}>
